@@ -13,7 +13,7 @@ import org.springframework.jms.connection.CachingConnectionFactory;
 import javax.jms.ConnectionFactory;
 
 /**
- * TODO - JJW
+ * The main entry point of the program
  *
  * @author jjwyse
  * @version %I%, %G%
