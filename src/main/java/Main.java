@@ -21,7 +21,7 @@ public class Main
 {
     public static void main(String[] args) throws Exception
     {
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("http://localhost:61616");
+        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
         PooledConnectionFactory pooledConnectionFactory = new PooledConnectionFactory();
         pooledConnectionFactory.setMaxConnections(8);
