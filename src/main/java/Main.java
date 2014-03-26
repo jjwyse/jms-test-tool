@@ -8,6 +8,7 @@ import org.apache.camel.component.jms.JmsConfiguration;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jms.connection.CachingConnectionFactory;
 
 import javax.jms.ConnectionFactory;
 
@@ -34,11 +35,8 @@ public class Main
         jmsComponent.setConfiguration(jmsConfig);
 
         CamelContext camelContext = new DefaultCamelContext();
-        camelContext.addComponent("jms", ActiveMQComponent.jmsComponentAutoAcknowledge(connectionFactory));
+        camelContext.addComponent("jms", jmsComponent);
         camelContext.start();
-
-//        ApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"camel-context.xml"});
-//        CamelContext camelContext = (CamelContext) context.getBean("camelContext");
 
         new MainFrame(camelContext.createProducerTemplate());
     }
