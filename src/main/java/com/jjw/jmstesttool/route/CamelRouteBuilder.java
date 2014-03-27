@@ -16,11 +16,11 @@ public class CamelRouteBuilder extends RouteBuilder {
         JaxbDataFormat jaxb = new JaxbDataFormat(true);
         jaxb.setContextPath("com.jjw.jmstesttool.jaxb");
 
+        // listens on direct:note, unmarshals object and sends to our jms:queue:testing endpoint
+        from("direct:note").marshal(jaxb).to("jms:queue:testing");
+
         // listens on direct:testing and sends to our logging endpoint
         from("direct:testing").to("direct:logging");
-
-        // listens on direct:note, unmarshals object and sends to our logging endpoint
-        from("direct:note").marshal(jaxb).to("direct:logging");
 
         // listens on jms:queue:testing and sends to our logging endpoint
         from("jms:queue:testing").to("direct:logging");
