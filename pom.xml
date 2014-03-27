@@ -90,19 +90,15 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.jms</groupId>
-            <artifactId>jms</artifactId>
-            <version>2.0</version>
-            <scope>system</scope>
-            <systemPath>/Users/jjwyse/Downloads/jms-2.0.jar</systemPath>
+            <groupId>com.tibco</groupId>
+            <artifactId>tibjms</artifactId>
+            <version>8.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.tibco.ems</groupId>
-            <artifactId>tibjms</artifactId>
-            <version>5.0.0</version>
-            <scope>system</scope>
-            <systemPath>/Users/jjwyse/Downloads/tibjms.jar</systemPath>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
+            <version>1.1</version>
         </dependency>
 
         <!-- testing -->
