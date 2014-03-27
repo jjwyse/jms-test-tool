@@ -54,16 +54,16 @@ public class JmsPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 if (queueButton.isSelected()) {
-                    LOG.info("Sending Queue to jms:queue:" + queueTextField.getText());
+                    LOG.info("Sending to jms:queue:" + queueTextField.getText());
                     myProducer.requestBody("jms:queue:" + queueTextField.getText(), "Queue");
                 }
                 else if (topicButton.isSelected()) {
-                    LOG.info("Sending Topic to jms:topic:" + topicTextField.getText());
+                    LOG.info("Sending to jms:topic:" + topicTextField.getText());
                     myProducer.sendBody("jms:topic:" + topicTextField.getText(), "Topic");
                 }
                 else {
                     String endpoint = directTextField.getText();
-                    LOG.info("Sending Direct to direct:" + endpoint);
+                    LOG.info("Sending to direct:" + endpoint);
                     myProducer.sendBody("direct:" + endpoint, createDirectBody(endpoint));
                 }
             }
