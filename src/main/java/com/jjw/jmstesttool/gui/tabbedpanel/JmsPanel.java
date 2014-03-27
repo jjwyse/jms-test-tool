@@ -1,6 +1,8 @@
 package com.jjw.jmstesttool.gui.tabbedpanel;
 
+import com.jjw.jmstesttool.jaxb.Note;
 import org.apache.camel.ProducerTemplate;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.swing.*;
@@ -8,8 +10,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class JmsPanel extends JPanel
-{
+public class JmsPanel extends JPanel {
     /**
      * Logger instance.
      */
@@ -20,10 +21,11 @@ public class JmsPanel extends JPanel
      */
     private static final long serialVersionUID = 1L;
 
+    private static final String NOTE = "note";
+
     public ProducerTemplate myProducer;
 
-    public JmsPanel(ProducerTemplate producer)
-    {
+    public JmsPanel(ProducerTemplate producer) {
         super();
         myProducer = producer;
         setupLayout();
@@ -31,13 +33,11 @@ public class JmsPanel extends JPanel
         setupWestPanel();
     }
 
-    private void setupLayout()
-    {
+    private void setupLayout() {
         this.setLayout(new BorderLayout(10, 10));
     }
 
-    private void setupSouthPanel()
-    {
+    private void setupSouthPanel() {
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 
@@ -50,25 +50,21 @@ public class JmsPanel extends JPanel
         final JTextField topicTextField = new JTextField(10);
         final JTextField directTextField = new JTextField(10);
         JButton sendButton = new JButton("Send");
-        sendButton.addActionListener(new ActionListener()
-        {
+        sendButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent arg0)
-            {
-                if (queueButton.isSelected())
-                {
-                    LOG.info("Sending Queue to jms:queue:" + queueTextField.getText());
+            public void actionPerformed(ActionEvent arg0) {
+                if (queueButton.isSelected()) {
+                    LOG.info("Sending to jms:queue:" + queueTextField.getText());
                     myProducer.requestBody("jms:queue:" + queueTextField.getText(), "Queue");
                 }
-                else if (topicButton.isSelected())
-                {
-                    LOG.info("Sending Topic to jms:topic:" + topicTextField.getText());
+                else if (topicButton.isSelected()) {
+                    LOG.info("Sending to jms:topic:" + topicTextField.getText());
                     myProducer.sendBody("jms:topic:" + topicTextField.getText(), "Topic");
                 }
-                else
-                {
-                    LOG.info("Sending Direct to direct:" + directTextField.getText());
-                    myProducer.sendBody("direct:" + directTextField.getText(), "Direct");
+                else {
+                    String endpoint = directTextField.getText();
+                    LOG.info("Sending to direct:" + endpoint);
+                    myProducer.sendBody("direct:" + endpoint, createDirectBody(endpoint));
                 }
             }
 
@@ -89,8 +85,20 @@ public class JmsPanel extends JPanel
         this.add(southPanel, BorderLayout.SOUTH);
     }
 
-    private void setupWestPanel()
-    {
+    private Object createDirectBody(String directEndpoint) {
+        if (StringUtils.equals(directEndpoint, NOTE)) {
+            Note note = new Note();
+            note.setTo("note_to");
+            note.setFrom("note_from");
+            note.setHeading("note_heading");
+            note.setBody("note_body");
+            return note;
+        }
+
+        return "Direct";
+    }
+
+    private void setupWestPanel() {
         JPanel westPanel = new JPanel();
         westPanel.setLayout(new BoxLayout(westPanel, BoxLayout.Y_AXIS));
 

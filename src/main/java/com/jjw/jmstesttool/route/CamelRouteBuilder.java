@@ -1,6 +1,5 @@
 package com.jjw.jmstesttool.route;
 
-import com.jjw.jmstesttool.jaxb.Note;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JaxbDataFormat;
 
@@ -17,20 +16,16 @@ public class CamelRouteBuilder extends RouteBuilder {
         JaxbDataFormat jaxb = new JaxbDataFormat(true);
         jaxb.setContextPath("com.jjw.jmstesttool.jaxb");
 
-        // listens on direct:testing, unmarshals POJO and sends to our logging endpoint
-        from("direct:testing").unmarshal(jaxb).to("direct:logging");
+        // listens on direct:note, unmarshals object and sends to our jms:queue:testing endpoint
+        from("direct:note").marshal(jaxb).to("jms:queue:testing");
 
-        // listens on direct:note, and sends a Note object to our direct:testing endpoint
-        from("direct:note").to("direct:testing");
+        // listens on direct:testing and sends to our logging endpoint
+        from("direct:testing").to("direct:logging");
 
         // listens on jms:queue:testing and sends to our logging endpoint
         from("jms:queue:testing").to("direct:logging");
 
         // listens on direct:logging and then logs a message
-        from("direct:logging").to("log:com.jjw.jmstesttool?level=INFO&showAll=true");
-    }
-
-    private Note createNote() {
-        return new Note();
+        from("direct:logging").to("log:com.jjw.jmstesttool?level=INFO&showBody=true");
     }
 }
