@@ -1,6 +1,7 @@
 package com.jjw.jmstesttool;
 
 import com.jjw.jmstesttool.gui.MainFrame;
+import com.jjw.jmstesttool.route.CamelRouteBuilder;
 import com.tibco.tibjms.TibjmsConnectionFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.camel.component.ActiveMQComponent;
@@ -54,6 +55,7 @@ public class Main {
             throw new RuntimeException(showUsage());
         }
 
+        camelContext.addRoutes(new CamelRouteBuilder());
         camelContext.start();
 
         new MainFrame(camelContext.createProducerTemplate());
