@@ -4,6 +4,7 @@ import com.jjw.jmstesttool.jaxb.Note;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.util.StopWatch;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,12 +24,15 @@ public class JmsPanel extends JPanel {
 
     private static final String NOTE = "note";
 
+    final JSpinner spinner = new JSpinner();
+
     public ProducerTemplate myProducer;
 
     public JmsPanel(ProducerTemplate producer) {
         super();
         myProducer = producer;
         setupLayout();
+        setupNorthPanel();
         setupSouthPanel();
         setupWestPanel();
     }
@@ -37,9 +41,9 @@ public class JmsPanel extends JPanel {
         this.setLayout(new BorderLayout(10, 10));
     }
 
-    private void setupSouthPanel() {
-        JPanel southPanel = new JPanel();
-        southPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+    private void setupNorthPanel() {
+        JPanel northPanel = new JPanel();
+        northPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 
         ButtonGroup buttonGroup = new ButtonGroup();
         final JRadioButton queueButton = new JRadioButton("Queue");
@@ -54,18 +58,34 @@ public class JmsPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 if (queueButton.isSelected()) {
-                    LOG.info("Sending to jms:queue:" + queueTextField.getText());
-                    myProducer.requestBody("jms:queue:" + queueTextField.getText(), "Queue");
+                    sendMessages("jms:queue:" + queueTextField.getText());
                 }
                 else if (topicButton.isSelected()) {
-                    LOG.info("Sending to jms:topic:" + topicTextField.getText());
-                    myProducer.sendBody("jms:topic:" + topicTextField.getText(), "Topic");
+                    sendMessages("jms:topic:" + topicTextField.getText());
                 }
                 else {
-                    String endpoint = directTextField.getText();
-                    LOG.info("Sending to direct:" + endpoint);
-                    myProducer.sendBody("direct:" + endpoint, createDirectBody(endpoint));
+                    sendMessages("direct:" + directTextField.getText());
                 }
+            }
+
+            private void sendMessages(String endpoint) {
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+
+                int numMessagesToSend = (Integer) spinner.getValue();
+                for (int i = 0; i < numMessagesToSend; i++) {
+                    LOG.info(i + " - Sending to " + endpoint);
+                    if (endpoint.startsWith("jms:queue:")) {
+                        myProducer.requestBody(endpoint, createBody(endpoint));
+                    }
+                    else {
+                        myProducer.sendBody(endpoint, createBody(endpoint));
+                    }
+                }
+                stopWatch.stop();
+                LOG.info("Elapsed time for sending " + numMessagesToSend + " message was: " + stopWatch.getTotalTimeSeconds() + " seconds");
+                double messagesPerSecond = stopWatch.getTotalTimeSeconds() / numMessagesToSend;
+                LOG.info("messages/s: " + messagesPerSecond);
             }
 
         });
@@ -74,19 +94,33 @@ public class JmsPanel extends JPanel {
         buttonGroup.add(topicButton);
         buttonGroup.add(directButton);
 
-        southPanel.add(queueButton);
-        southPanel.add(queueTextField);
-        southPanel.add(topicButton);
-        southPanel.add(topicTextField);
-        southPanel.add(directButton);
-        southPanel.add(directTextField);
-        southPanel.add(sendButton);
+        northPanel.add(queueButton);
+        northPanel.add(queueTextField);
+        northPanel.add(topicButton);
+        northPanel.add(topicTextField);
+        northPanel.add(directButton);
+        northPanel.add(directTextField);
+        northPanel.add(sendButton);
+
+        this.add(northPanel, BorderLayout.NORTH);
+    }
+
+    private void setupSouthPanel() {
+        JPanel southPanel = new JPanel();
+
+        JLabel label = new JLabel("Number of messages to send:");
+
+        spinner.setModel(new SpinnerNumberModel(1, 1, 1000, 1));
+        spinner.setName("Number of messages to send");
+
+        southPanel.add(label);
+        southPanel.add(spinner);
 
         this.add(southPanel, BorderLayout.SOUTH);
     }
 
-    private Object createDirectBody(String directEndpoint) {
-        if (StringUtils.equals(directEndpoint, NOTE)) {
+    private Object createBody(String endpoint) {
+        if (StringUtils.endsWith(endpoint, NOTE)) {
             Note note = new Note();
             note.setTo("note_to");
             note.setFrom("note_from");
@@ -95,7 +129,7 @@ public class JmsPanel extends JPanel {
             return note;
         }
 
-        return "Direct";
+        return "Message";
     }
 
     private void setupWestPanel() {
